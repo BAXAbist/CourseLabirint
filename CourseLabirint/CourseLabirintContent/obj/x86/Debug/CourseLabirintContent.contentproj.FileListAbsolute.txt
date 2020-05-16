@@ -1,0 +1,2 @@
+C:\Users\tolik\source\repos\CourseLabirint\CourseLabirint\CourseLabirintContent\obj\x86\Debug\CourseLabirintContent.contentprojAssemblyReference.cache
+C:\Users\tolik\source\repos\CourseLabirint\CourseLabirint\CourseLabirintContent\obj\x86\Debug\CourseLabirintContent.contentproj.CoreCompileInputs.cache
