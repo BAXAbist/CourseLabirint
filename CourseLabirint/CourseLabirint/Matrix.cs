@@ -28,14 +28,7 @@ namespace CourseLabirint
             {
                 for (var j = 0; j < _size.Height; j++)
                 {
-                    if ((i % 2 != 0 && j % 2 != 0) && (i < _size.Height - 1 && j < _size.Width - 1))
-                    {
                         spriteBatch.Draw(_maze[i, j], new Rectangle(i * 10, j * 10, 10, 10), Color.White);
-                    }
-                    else
-                    {
-                        spriteBatch.Draw(_maze[i, j], new Rectangle(i * 10, j * 10, 10, 10), Color.White);
-                    }
                 }
             }
         }

@@ -15,12 +15,6 @@ namespace CourseLabirint
 {
     public class Game1 : Game
     {
-        public enum GuiControls
-        {
-            Button,
-            Panel,
-            Text
-        }
         public struct Cells
         {
             public int X;
@@ -45,6 +39,7 @@ namespace CourseLabirint
         private readonly List<Cells> _neighbours;
         private readonly Stack<Cells> _path;
         private int _status;
+        private int check_key=0;
         public Game1(List<Cells> neighbours, Stack<Cells> path)
         {
             _neighbours = neighbours;
@@ -52,7 +47,7 @@ namespace CourseLabirint
             var graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             var winWidth = graphics.PreferredBackBufferWidth = 510;
-            var winHeight = graphics.PreferredBackBufferHeight = 510;
+            var winHeight = graphics.PreferredBackBufferHeight = 310;
             _size = new Cells(winWidth / 10, winHeight / 10);
             _start = new Cells(1, 1);
             _finish = new Cells(_size.X - 2, _size.Y - 2);
@@ -161,7 +156,7 @@ namespace CourseLabirint
                 {
                     _path.Push(a);
                     _neighbours.Clear();
-                    _status = 2;
+                    _status = 3;
                 }
                 else
                 {
@@ -209,7 +204,7 @@ namespace CourseLabirint
             {
                 for (var j = 0; j < _size.Y; j++)
                 {
-                    if ((i % 2 != 0 && j % 2 != 0) && (i < _size.Y - 1 && j < _size.X - 1))
+                    if ((i % 2 != 0 && j % 2 != 0) && (i < _size.Y - 1 || j < _size.X - 1))
                     {
                         _maze[i, j] = Content.Load<Texture2D>("flat");
                     }
@@ -223,31 +218,38 @@ namespace CourseLabirint
         }
         protected override void Update(GameTime gameTime)
         {
-            base.Update(gameTime);
+            if (Keyboard.GetState().IsKeyDown(Keys.Escape))
+                this.Exit();
+            if (Keyboard.GetState().IsKeyDown(Keys.Space))
+                check_key++;
+            if (Keyboard.GetState().IsKeyUp(Keys.Space) && check_key > 0)
+            {
+                _status++;
+                check_key = 0;
+            }
             switch (_status)
             {
                 case 0:
                     Window.Title = "Draw Maze";
                     DrawMaze();
                     break;
-                case 1:
+                case 2:
                     Window.Title = "Draw Path";
                     Path();
                     break;
-                case 2:
+                case 3:
                     Window.Title = "Finished";
                     break;
             }
+            base.Update(gameTime);
         }
 
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.White);
             _spriteBatch.Begin();
-
-            var matrix = new Matrix(_size, _maze);
-            matrix.Draw(_spriteBatch);
-
+                var matrix = new Matrix(_size, _maze);
+                matrix.Draw(_spriteBatch);
             _spriteBatch.End();
             base.Draw(gameTime);
         }
