@@ -43,6 +43,8 @@ namespace CourseLabirint
         private int check_key=0;
         int winWidth;
         int winHeight;
+        int[,] mat;
+        int d;
         public Game1(List<Cells> neighbours, Stack<Cells> path)
         {
             _neighbours = neighbours;
@@ -51,7 +53,7 @@ namespace CourseLabirint
             var graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             winWidth = graphics.PreferredBackBufferWidth = 510;
-             winHeight = graphics.PreferredBackBufferHeight = 310;
+             winHeight = graphics.PreferredBackBufferHeight = 510;
             _size = new Cells(winWidth / 10, winHeight / 10);
             _start = new Cells(1, 1);
             _finish = new Cells(_size.X - 2, _size.Y - 2);
@@ -59,6 +61,7 @@ namespace CourseLabirint
             _path.Push(_start);
             _path.Push(_start);
             IsMouseVisible = true;
+            mat = new int[_size.X, _size.Y];
         }
 
         protected override void Initialize()
@@ -104,6 +107,8 @@ namespace CourseLabirint
                 MainPoint();
                 _status = 1;
                 _dfs.Enqueue(_start);
+                d = 1;
+                mat[_start.X, _start.Y] = d;
                 _neighbours.Clear();
             }
         }
@@ -111,7 +116,7 @@ namespace CourseLabirint
         private void BreakWalls()
         {
             var rand = new Random();
-            for(int k=0;k<50;k++)
+            for(int k=0;k<200;k++)
             {
                 int x = rand.Next(1, _size.X-1);
                 int y = rand.Next(1, _size.Y-1);
@@ -169,31 +174,34 @@ namespace CourseLabirint
         //Draw Path
         private void Path()
         {
-            if (_dfs.Count == 0) return;
+            if (_dfs.Peek().X == _finish.X && _dfs.Peek().Y == _finish.Y)
+            {
+                _neighbours.Clear();
+                _status = 4;
+                _dfs.Clear();
+                _dfs.Enqueue(_finish);
+                return;
+            }
             GetNeighboursPath(_dfs.Peek());
             if (_neighbours.Count != 0)
             {
-                _maze[_dfs.Peek().X, _dfs.Peek().Y] = Content.Load<Texture2D>("start");
-                var a = _neighbours[new Random(DateTime.Now.Millisecond).Next(0, _neighbours.Count)];
-                if (a.X == _finish.X && a.Y == _finish.Y)
+                for (int i = 0; i < _neighbours.Count; i++)
                 {
-                    _dfs.Enqueue(a);
-                    _neighbours.Clear();
-                    _status = 4;
+                    _dfs.Enqueue(_neighbours[i]);
+                    _maze[_neighbours[i].X, _neighbours[i].Y] = Content.Load<Texture2D>("start");
+                    mat[_neighbours[i].X, _neighbours[i].Y] = mat[_dfs.Peek().X,_dfs.Peek().Y] + 1;
                 }
-                else
-                {
-                    _dfs.Enqueue(a);
-                    _maze[_dfs.Peek().X, _dfs.Peek().Y] = Content.Load<Texture2D>("now");
-                    _neighbours.Clear();
-                }
+                _maze[_dfs.Peek().X, _dfs.Peek().Y] = Content.Load<Texture2D>("vpath");
+                _vpath = _maze[_dfs.Peek().X, _dfs.Peek().Y].GetHashCode();
+                _dfs.Dequeue();
+                _neighbours.Clear();
             }
             else
             {
                 _maze[_dfs.Peek().X, _dfs.Peek().Y] = Content.Load<Texture2D>("vpath");
-                _vpath = _maze[_dfs.Peek().X, _dfs.Peek().Y].GetHashCode();
                 _dfs.Dequeue();
             }
+
         }
         private void GetNeighboursPath(Cells localCells)
         {
@@ -217,8 +225,46 @@ namespace CourseLabirint
                 }
             }
         }
+
+        private void PathBack()
+        {
+            if (_dfs.Peek().X == _start.X && _dfs.Peek().Y == _start.Y)
+            {
+                _maze[_dfs.Peek().X, _dfs.Peek().Y] = Content.Load<Texture2D>("now");
+                _status = 5;
+                return;
+            }
+            GetNeighboursPathBack(_dfs.Peek());
+            _maze[_dfs.Peek().X,_dfs.Peek().Y] = Content.Load<Texture2D>("now");
+            _dfs.Dequeue();
+        }
+
+        private void GetNeighboursPathBack(Cells localCells)
+        {
+            var x = localCells.X;
+            var y = localCells.Y;
+            const int distance = 1;
+            var d = new[]
+            {
+                new Cells(x, y - distance),
+                new Cells(x + distance, y),
+                new Cells(x, y + distance),
+                new Cells(x - distance, y)
+            };
+            for (var i = 0; i < 4; i++)
+            {
+                var s = d[i];
+                if (s.X <= 0 || s.X >= _size.X || s.Y <= 0 || s.Y >= _size.Y) continue;
+                if (mat[s.X, s.Y] + 1 == mat[x, y])
+                {
+                    _dfs.Enqueue(s);
+                    return;
+                }
+            }
+        }
+
         //Draw Path
-        readonly Rectangle _pr = new Rectangle(_size.X * 10, 0, 200, _size.Y * 10);
+
         //Main Function
         protected override void LoadContent()
         {
@@ -277,10 +323,14 @@ namespace CourseLabirint
                     BreakWalls();
                     break;
                 case 3:
-                    Window.Title = "Draw Path";
+                    Window.Title = "Draw Water";
                     Path();
                     break;
                 case 4:
+                    Window.Title = "Draw Path";
+                    PathBack();
+                    break;
+                case 5:
                     Window.Title = "Finished";
                     break;
             }
