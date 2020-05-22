@@ -45,15 +45,17 @@ namespace CourseLabirint
         int winHeight;
         int[,] mat;
         int d;
+
         public Game1(List<Cells> neighbours, Stack<Cells> path)
         {
+
             _neighbours = neighbours;
             _path = path;
             _dfs = new Queue<Cells>();
             var graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
-            winWidth = graphics.PreferredBackBufferWidth = 510;
-             winHeight = graphics.PreferredBackBufferHeight = 510;
+            winWidth = graphics.PreferredBackBufferWidth = 1010;
+             winHeight = graphics.PreferredBackBufferHeight = 1010;
             _size = new Cells(winWidth / 10, winHeight / 10);
             _start = new Cells(1, 1);
             _finish = new Cells(_size.X - 2, _size.Y - 2);
@@ -83,12 +85,14 @@ namespace CourseLabirint
         }
         private void DrawMaze()
         {
-            if (_path.Count != 0)
+            var rand = new Random();
+            while(_path.Count != 0)
             {
                 GetNeighbours(_path.Peek());
                 if (_neighbours.Count != 0)
                 {
-                    var a = _neighbours[new Random().Next(0, _neighbours.Count)];
+                    var a = _neighbours[rand.Next(0, _neighbours.Count)];
+                    rand.Next(0, 2);
                     RemoteWall(_path.Peek(), a);
                     _path.Push(a);
                     _maze[_path.Peek().X, _path.Peek().Y] = Content.Load<Texture2D>("now");
@@ -102,15 +106,12 @@ namespace CourseLabirint
                     _maze[_path.Peek().X, _path.Peek().Y] = Content.Load<Texture2D>("now");
                 }
             }
-            else
-            {
                 MainPoint();
                 _status = 1;
                 _dfs.Enqueue(_start);
                 d = 1;
                 mat[_start.X, _start.Y] = d;
                 _neighbours.Clear();
-            }
         }
 
         private void BreakWalls()
@@ -174,33 +175,34 @@ namespace CourseLabirint
         //Draw Path
         private void Path()
         {
-            if (_dfs.Peek().X == _finish.X && _dfs.Peek().Y == _finish.Y)
+            while (_dfs.Peek().X != _finish.X || _dfs.Peek().Y != _finish.Y)
             {
-                _neighbours.Clear();
-                _status = 4;
-                _dfs.Clear();
-                _dfs.Enqueue(_finish);
-                return;
-            }
-            GetNeighboursPath(_dfs.Peek());
-            if (_neighbours.Count != 0)
-            {
-                for (int i = 0; i < _neighbours.Count; i++)
+
+                GetNeighboursPath(_dfs.Peek());
+                if (_neighbours.Count != 0)
                 {
-                    _dfs.Enqueue(_neighbours[i]);
-                    _maze[_neighbours[i].X, _neighbours[i].Y] = Content.Load<Texture2D>("start");
-                    mat[_neighbours[i].X, _neighbours[i].Y] = mat[_dfs.Peek().X,_dfs.Peek().Y] + 1;
+                    for (int i = 0; i < _neighbours.Count; i++)
+                    {
+                        _dfs.Enqueue(_neighbours[i]);
+                        _maze[_neighbours[i].X, _neighbours[i].Y] = Content.Load<Texture2D>("start");
+                        mat[_neighbours[i].X, _neighbours[i].Y] = mat[_dfs.Peek().X, _dfs.Peek().Y] + 1;
+                    }
+                    _maze[_dfs.Peek().X, _dfs.Peek().Y] = Content.Load<Texture2D>("vpath");
+                    _vpath = _maze[_dfs.Peek().X, _dfs.Peek().Y].GetHashCode();
+                    _dfs.Dequeue();
+                    _neighbours.Clear();
                 }
-                _maze[_dfs.Peek().X, _dfs.Peek().Y] = Content.Load<Texture2D>("vpath");
-                _vpath = _maze[_dfs.Peek().X, _dfs.Peek().Y].GetHashCode();
-                _dfs.Dequeue();
-                _neighbours.Clear();
+                else
+                {
+                    _maze[_dfs.Peek().X, _dfs.Peek().Y] = Content.Load<Texture2D>("vpath");
+                    _dfs.Dequeue();
+                }
             }
-            else
-            {
-                _maze[_dfs.Peek().X, _dfs.Peek().Y] = Content.Load<Texture2D>("vpath");
-                _dfs.Dequeue();
-            }
+            _neighbours.Clear();
+            _status = 4;
+            _dfs.Clear();
+            _dfs.Enqueue(_finish);
+            return;
 
         }
         private void GetNeighboursPath(Cells localCells)
