@@ -39,12 +39,15 @@ namespace CourseLabirint
         private readonly List<Cells> _neighbours;
         private readonly Stack<Cells> _path;
         private readonly Queue<Cells> _dfs;
+        private Random rand = new Random();
         private int _status;
         private int check_key=0;
+        private int check_keyQ = 0;
         int winWidth;
         int winHeight;
         int[,] mat;
         int d;
+        bool skipQ = false;
         public Game1(List<Cells> neighbours, Stack<Cells> path)
         {
             _neighbours = neighbours;
@@ -88,7 +91,8 @@ namespace CourseLabirint
                 GetNeighbours(_path.Peek());
                 if (_neighbours.Count != 0)
                 {
-                    var a = _neighbours[new Random().Next(0, _neighbours.Count)];
+                    var a = _neighbours[rand.Next(0, _neighbours.Count)];
+                    rand.Next(-10, -1);
                     RemoteWall(_path.Peek(), a);
                     _path.Push(a);
                     _maze[_path.Peek().X, _path.Peek().Y] = Content.Load<Texture2D>("now");
@@ -110,6 +114,7 @@ namespace CourseLabirint
                 d = 1;
                 mat[_start.X, _start.Y] = d;
                 _neighbours.Clear();
+                skipQ = false;
             }
         }
 
@@ -180,6 +185,7 @@ namespace CourseLabirint
                 _status = 4;
                 _dfs.Clear();
                 _dfs.Enqueue(_finish);
+                skipQ = false;
                 return;
             }
             GetNeighboursPath(_dfs.Peek());
@@ -232,6 +238,7 @@ namespace CourseLabirint
             {
                 _maze[_dfs.Peek().X, _dfs.Peek().Y] = Content.Load<Texture2D>("now");
                 _status = 5;
+                skipQ = false;
                 return;
             }
             GetNeighboursPathBack(_dfs.Peek());
@@ -313,11 +320,20 @@ namespace CourseLabirint
                 _status++;
                 check_key = 0;
             }
+            if (Keyboard.GetState().IsKeyDown(Keys.F1))
+                check_keyQ++;
+            if (Keyboard.GetState().IsKeyUp(Keys.F1) && check_keyQ > 0)
+            {
+                skipQ=true;
+                check_keyQ = 0;
+            }
             switch (_status)
             {
                 case 0:
                     Window.Title = "Draw Maze";
                     DrawMaze();
+                    while (skipQ)
+                        DrawMaze();
                     break;
                 case 1:
                     BreakWalls();
@@ -325,12 +341,16 @@ namespace CourseLabirint
                 case 3:
                     Window.Title = "Draw Water";
                     Path();
-                    break;
-                case 4:
-                    Window.Title = "Draw Path";
-                    PathBack();
+                    while (skipQ)
+                        Path();
                     break;
                 case 5:
+                    Window.Title = "Draw Path";
+                    PathBack();
+                    while (skipQ)
+                        PathBack();
+                    break;
+                case 6:
                     Window.Title = "Finished";
                     break;
             }
