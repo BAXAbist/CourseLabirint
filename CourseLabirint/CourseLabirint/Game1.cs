@@ -121,7 +121,7 @@ namespace CourseLabirint
         private void BreakWalls()
         {
             var rand = new Random();
-            for(int k=0;k<200;k++)
+            for(int k=0;k<150;k++)
             {
                 int x = rand.Next(1, _size.X-1);
                 int y = rand.Next(1, _size.Y-1);
@@ -132,9 +132,9 @@ namespace CourseLabirint
                     var kek = _maze[x, y].GetHashCode();
                 }
                 else
-                    k--;
-                _status = 2;
+                    k--;  
             }
+            _status = 2;
         }
         private void GetNeighbours(Cells localcell)
         {
@@ -237,7 +237,7 @@ namespace CourseLabirint
             if (_dfs.Peek().X == _start.X && _dfs.Peek().Y == _start.Y)
             {
                 _maze[_dfs.Peek().X, _dfs.Peek().Y] = Content.Load<Texture2D>("now");
-                _status = 5;
+                _status = 6;
                 skipQ = false;
                 return;
             }
