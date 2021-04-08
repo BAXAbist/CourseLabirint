@@ -26,6 +26,7 @@ namespace CourseLabirint
                 Y = newY;
             }
         }
+        private int cell_size = 2;
         private SpriteBatch _spriteBatch;
         private readonly Texture2D[,] _maze;
         private static Cells _size;
@@ -57,7 +58,7 @@ namespace CourseLabirint
             Content.RootDirectory = "Content";
             winWidth = graphics.PreferredBackBufferWidth = 510;
              winHeight = graphics.PreferredBackBufferHeight = 510;
-            _size = new Cells(winWidth / 10, winHeight / 10);
+            _size = new Cells(winWidth / cell_size, winHeight / cell_size);
             _start = new Cells(1, 1);
             _finish = new Cells(_size.X - 2, _size.Y - 2);
             _maze = new Texture2D[_size.X, _size.Y];
@@ -121,7 +122,7 @@ namespace CourseLabirint
         private void BreakWalls()
         {
             var rand = new Random();
-            for(int k=0;k<150;k++)
+            for(int k=0;k<0;k++)
             {
                 int x = rand.Next(1, _size.X-1);
                 int y = rand.Next(1, _size.Y-1);
@@ -362,7 +363,7 @@ namespace CourseLabirint
             GraphicsDevice.Clear(Color.White);
             _spriteBatch.Begin();
                 var matrix = new Matrix(_size, _maze);
-                matrix.Draw(_spriteBatch);
+                matrix.Draw(_spriteBatch,cell_size);
             _spriteBatch.End();
             base.Draw(gameTime);
         }
