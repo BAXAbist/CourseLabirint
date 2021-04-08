@@ -27,6 +27,9 @@ namespace CourseLabirint
             }
         }
         private int cell_size = 2;
+        private int labirint_n = 350;
+        private int labirint_m = 350;
+        private int count_walls = 1000;
         private SpriteBatch _spriteBatch;
         private readonly Texture2D[,] _maze;
         private static Cells _size;
@@ -56,8 +59,8 @@ namespace CourseLabirint
             _dfs = new Queue<Cells>();
             var graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
-            winWidth = graphics.PreferredBackBufferWidth = 510;
-             winHeight = graphics.PreferredBackBufferHeight = 510;
+            winWidth = graphics.PreferredBackBufferWidth = labirint_n * cell_size + cell_size;
+             winHeight = graphics.PreferredBackBufferHeight =  labirint_m * cell_size+ cell_size;
             _size = new Cells(winWidth / cell_size, winHeight / cell_size);
             _start = new Cells(1, 1);
             _finish = new Cells(_size.X - 2, _size.Y - 2);
@@ -119,10 +122,10 @@ namespace CourseLabirint
             }
         }
 
-        private void BreakWalls()
+        private void BreakWalls(int count_walls)
         {
             var rand = new Random();
-            for(int k=0;k<0;k++)
+            for(int k=0;k<count_walls;k++)
             {
                 int x = rand.Next(1, _size.X-1);
                 int y = rand.Next(1, _size.Y-1);
@@ -337,7 +340,7 @@ namespace CourseLabirint
                         DrawMaze();
                     break;
                 case 1:
-                    BreakWalls();
+                    BreakWalls(count_walls);
                     break;
                 case 3:
                     Window.Title = "Draw Water";
